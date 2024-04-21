@@ -111,6 +111,30 @@ INSERT_INTO_TABLE:
     table->count++;
 }
 
+char* ht_search(ht_hash_table* table, str key)
+{
+    int index = ht_get_hash(key, table->size, 0);
+    ht_item* item = ht_find_entry(table, index);
+    if (!item) {
+        return NULL;
+    }
+
+    int i = 1;
+    size_t key_len = strlen(key);
+    while (item) {
+        if (strncmp(item->key, key, key_len))
+            return item->value;
+
+        index = ht_get_hash(key, table->size, i);
+        item = ht_find_entry(table, index);
+        if (!item)
+            return NULL;
+
+        item = table->items[index];
+        ++i;
+    }
+}
+
 void free_space(void* ptr)
 {
     if (!ptr) {
