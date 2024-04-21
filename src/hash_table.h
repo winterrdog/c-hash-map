@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define HT_PRIME_1 151
+#define HT_PRIME_2 163
+
 // type aliases
 typedef struct {
     char* key;
