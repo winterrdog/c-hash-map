@@ -20,7 +20,7 @@ typedef struct {
 typedef const char* str;
 
 // function prototypes
-ht_hash_table* ht_create_hash_table();
+ht_hash_table* ht_create_hash_table(void);
 void ht_delete_hash_table(ht_hash_table* tab);
 void ht_insert(ht_hash_table* table, str key, str value);
 char* ht_search(ht_hash_table* table, str key);
