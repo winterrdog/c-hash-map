@@ -1,5 +1,11 @@
 #include "hash_table.h"
 
+// sentinel value to indicate that the item was deleted
+static ht_item HT_DELETED_ITEM = {
+    .key = NULL,
+    .value = NULL,
+};
+
 static ht_item* ht_create_item(str k, str v)
 {
     ht_item* ret = malloc(sizeof(ht_item));
@@ -115,14 +121,13 @@ char* ht_search(ht_hash_table* table, str key)
 {
     int index = ht_get_hash(key, table->size, 0);
     ht_item* item = ht_find_entry(table, index);
-    if (!item) {
+    if (!item)
         return NULL;
-    }
 
     int i = 1;
     size_t key_len = strlen(key);
     while (item) {
-        if (strncmp(item->key, key, key_len))
+        if (strncmp(item->key, key, key_len) == 0)
             return item->value;
 
         index = ht_get_hash(key, table->size, i);
@@ -135,6 +140,38 @@ char* ht_search(ht_hash_table* table, str key)
     }
 }
 
+void ht_delete(ht_hash_table* table, str key)
+{
+    int index = ht_get_hash(key, table->size, 0);
+    ht_item* item = ht_find_entry(table, index);
+    if (!item) {
+        fprintf(stderr, "item with key, %s, was not found!\n", key);
+        return;
+    }
+
+    int i = 1;
+    size_t key_len = strlen(key);
+    while (item) {
+        if (item != &HT_DELETED_ITEM) {
+            if (strncmp(item->key, key, key_len) == 0) {
+                ht_delete_item(item);
+                table->items[index] = &HT_DELETED_ITEM;
+            }
+        }
+
+        index = ht_get_hash(key, table->size, i);
+        item = ht_find_entry(table, index);
+        if (!item) {
+            fprintf(stderr, "item with key, %s, was not found!\n", key);
+            return;
+        }
+
+        ++i;
+    }
+
+    table->count--;
+}
+
 void free_space(void* ptr)
 {
     if (!ptr) {
@@ -142,5 +179,4 @@ void free_space(void* ptr)
     }
 
     free(ptr), ptr = NULL;
-    return;
 }
