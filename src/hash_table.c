@@ -101,14 +101,25 @@ void ht_insert(ht_hash_table* table, str key, str value)
     int index = ht_get_hash(key, table->size, 0);
     ht_item* curr_item = ht_find_entry(table, index);
     // check if index entry is empty
-    if (!curr_item)
+    if (!curr_item || curr_item == &HT_DELETED_ITEM)
         goto INSERT_INTO_TABLE;
 
     // search for an empty entry
     int i = 1;
+    size_t key_len = strlen(key);
     while (curr_item) {
         index = ht_get_hash(curr_item->key, table->size, i);
         curr_item = ht_find_entry(table, index);
+        if (curr_item == &HT_DELETED_ITEM)
+            goto INSERT_INTO_TABLE;
+
+        // if it's an update
+        if (strncmp(curr_item->key, key, key_len) == 0) {
+            ht_delete_item(curr_item);
+            table->items[index] = item;
+            return;
+        }
+
         ++i;
     }
 
@@ -121,7 +132,7 @@ char* ht_search(ht_hash_table* table, str key)
 {
     int index = ht_get_hash(key, table->size, 0);
     ht_item* item = ht_find_entry(table, index);
-    if (!item)
+    if (!item || item == &HT_DELETED_ITEM)
         return NULL;
 
     int i = 1;
@@ -132,7 +143,7 @@ char* ht_search(ht_hash_table* table, str key)
 
         index = ht_get_hash(key, table->size, i);
         item = ht_find_entry(table, index);
-        if (!item)
+        if (!item || item == &HT_DELETED_ITEM)
             return NULL;
 
         item = table->items[index];
