@@ -9,9 +9,8 @@ static ht_item HT_DELETED_ITEM = {
 static ht_item* ht_create_item(str k, str v)
 {
     ht_item* ret = malloc(sizeof(ht_item));
-    if (!ret) {
+    if (!ret)
         return NULL;
-    }
 
     ret->key = strndup(k, strlen(k));
     ret->value = strndup(v, strlen(v));
@@ -59,8 +58,9 @@ ht_hash_table* ht_create_hash_table()
 
 void ht_delete_hash_table(ht_hash_table* tab)
 {
+    ht_item* item = NULL;
     for (int i = 0; i != tab->size; ++i) {
-        ht_item* item = tab->items[i];
+        item = tab->items[i];
         if (item)
             ht_delete_item(item);
     }
@@ -200,9 +200,8 @@ void ht_delete(ht_hash_table* table, str key)
 
 void free_space(void* ptr)
 {
-    if (!ptr) {
+    if (!ptr)
         return;
-    }
 
     free(ptr), ptr = NULL;
 }
