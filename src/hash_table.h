@@ -1,3 +1,6 @@
+#ifndef HASH_TABLE_H
+#define HASH_TABLE_H
+
 #include <math.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -5,6 +8,7 @@
 #include <string.h>
 
 #include "prime.h"
+
 #define HT_PRIME_1 151
 #define HT_PRIME_2 163
 #define HT_INITIAL_BASE_SIZE 50
@@ -29,3 +33,4 @@ void ht_insert(ht_hash_table* table, str key, str value);
 char* ht_search(ht_hash_table* table, str key);
 void ht_delete(ht_hash_table* table, str key);
 void free_space(void* ptr);
+#endif
