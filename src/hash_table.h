@@ -7,6 +7,7 @@
 #include "prime.h"
 #define HT_PRIME_1 151
 #define HT_PRIME_2 163
+#define HT_INITIAL_BASE_SIZE 50
 
 // type aliases
 typedef struct {
@@ -15,6 +16,7 @@ typedef struct {
 } ht_item;
 typedef struct {
     size_t size;
+    size_t base_size;
     size_t count;
     ht_item** items;
 } ht_hash_table;

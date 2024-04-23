@@ -28,18 +28,33 @@ static void ht_delete_item(ht_item* item)
     return;
 }
 
-ht_hash_table* ht_create_hash_table()
+static ht_hash_table* ht_new_sized(const int base_size)
 {
-    ht_hash_table* ret = malloc(sizeof(ht_hash_table));
-    if (!ret) {
+    ht_hash_table* table = malloc(sizeof(ht_hash_table));
+    if (!table)
+        return NULL;
+
+    table->base_size = base_size,
+    table->size = next_prime(base_size),
+    table->count = 0,
+    table->items = calloc(table->size, sizeof(ht_item*));
+    if (!table->items) {
+        fprintf(stderr, "failed to make room for the hash table's items due to low memory\n");
         return NULL;
     }
 
-    ret->count = 0;
-    ret->size = 53;
-    ret->items = calloc(ret->size, sizeof(ht_item*));
+    return table;
+}
 
-    return ret;
+ht_hash_table* ht_create_hash_table()
+{
+    ht_hash_table* table = ht_new_sized(HT_INITIAL_BASE_SIZE);
+    if (!table) {
+        fprintf(stderr, "failed to make a new hash table due to low memory\n");
+        return NULL;
+    }
+
+    return table;
 }
 
 void ht_delete_hash_table(ht_hash_table* tab)
