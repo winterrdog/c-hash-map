@@ -226,6 +226,11 @@ char* ht_search(ht_hash_table* table, str key)
     }
 }
 
+size_t ht_size(ht_hash_table* table)
+{
+    return table->count;
+}
+
 void ht_delete(ht_hash_table* table, str key)
 {
     if (!table) {

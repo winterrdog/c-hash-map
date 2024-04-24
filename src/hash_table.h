@@ -33,4 +33,6 @@ void ht_insert(ht_hash_table* table, str key, str value);
 char* ht_search(ht_hash_table* table, str key);
 void ht_delete(ht_hash_table* table, str key);
 void free_space(void* ptr);
+size_t ht_size(ht_hash_table* table);
+
 #endif
