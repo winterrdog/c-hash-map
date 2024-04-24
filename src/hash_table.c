@@ -79,7 +79,7 @@ static void ht_resize(ht_hash_table* table, const int base_size)
     new_table->size ^= table->size;
     table->size ^= new_table->size;
 
-    const ht_item** tmp_items = table->items;
+    ht_item** tmp_items = table->items;
     table->items = new_table->items;
     new_table->items = tmp_items;
 
@@ -164,8 +164,7 @@ void ht_insert(ht_hash_table* table, str key, str value)
         return;
     }
 
-    const int load = ht_calc_table_load(table);
-    if (load >= 70)
+    if (ht_calc_table_load(table) >= 70)
         ht_resize_up(table);
 
     ht_item* item = ht_create_item(key, value);
@@ -234,8 +233,7 @@ void ht_delete(ht_hash_table* table, str key)
         return;
     }
 
-    const int load = ht_calc_table_load(table);
-    if (load < 10)
+    if (ht_calc_table_load(table) < 10)
         ht_resize_down(table);
 
     int index = ht_get_hash(key, table->size, 0);
