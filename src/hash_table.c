@@ -46,14 +46,68 @@ static ht_hash_table* ht_new_sized(const int base_size)
 }
 
 ht_hash_table* ht_create_hash_table()
+static void ht_transfer_items(ht_hash_table* src, ht_hash_table* dest)
 {
-    ht_hash_table* table = ht_new_sized(HT_INITIAL_BASE_SIZE);
-    if (!table) {
-        fprintf(stderr, "failed to make a new hash table due to low memory\n");
-        return NULL;
+    ht_item* item = NULL;
+    for (int i = 0; i != src->size; ++i) {
+        item = src->items[i];
+        if (item && item != &HT_DELETED_ITEM)
+            ht_insert(dest, item->key, item->value);
     }
+}
 
     return table;
+static void ht_resize(ht_hash_table* table, const int base_size)
+{
+    if (base_size < HT_INITIAL_BASE_SIZE) {
+        fprintf(stderr, "the 'base_size' provided is lower than the set initial base size\n");
+        return;
+    }
+
+    ht_hash_table* new_table = ht_new_sized(base_size);
+    if (!new_table)
+        return;
+
+    // transfer items to new table
+    ht_transfer_items(table, new_table);
+
+    // update old table's metadata
+    table->count = new_table->count, table->base_size = new_table->base_size;
+
+    // swap new table's size and items with old table's size and items
+    table->size ^= new_table->size;
+    new_table->size ^= table->size;
+    table->size ^= new_table->size;
+
+    const ht_item** tmp_items = table->items;
+    table->items = new_table->items;
+    new_table->items = tmp_items;
+
+    // delete new table
+    ht_delete_hash_table(new_table);
+}
+
+static int ht_calc_table_load(ht_hash_table* table)
+{
+    return (int)((table->count * 100) / table->size);
+}
+
+static void ht_resize_up(ht_hash_table* table)
+{
+    const int new_size = table->base_size * 2;
+    ht_resize(table, new_size);
+}
+
+static void ht_resize_down(ht_hash_table* table)
+{
+    const int new_size = table->base_size / 2;
+    ht_resize(table, new_size);
+}
+
+ht_hash_table* ht_create_hash_table()
+{
+    ht_hash_table* table = ht_new_sized(HT_INITIAL_BASE_SIZE);
+    return table ? table : NULL;
 }
 
 void ht_delete_hash_table(ht_hash_table* tab)
@@ -107,6 +161,15 @@ static ht_item* ht_find_entry(ht_hash_table* table, int index)
 
 void ht_insert(ht_hash_table* table, str key, str value)
 {
+    if (!table) {
+        fprintf(stderr, "there's no hash table to insert into. Probably it's set to NULL\n");
+        return;
+    }
+
+    const int load = ht_calc_table_load(table);
+    if (load >= 70)
+        ht_resize_up(table);
+
     ht_item* item = ht_create_item(key, value);
     if (!item) {
         fprintf(stderr, "failed to insert item due to low memory\n");
@@ -168,6 +231,15 @@ char* ht_search(ht_hash_table* table, str key)
 
 void ht_delete(ht_hash_table* table, str key)
 {
+    if (!table) {
+        fprintf(stderr, "there's no hash table to delete from. Probably it's set to NULL\n");
+        return;
+    }
+
+    const int load = ht_calc_table_load(table);
+    if (load < 10)
+        ht_resize_down(table);
+
     int index = ht_get_hash(key, table->size, 0);
     ht_item* item = ht_find_entry(table, index);
     if (!item) {
