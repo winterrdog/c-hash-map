@@ -8,37 +8,29 @@ static ht_item HT_DELETED_ITEM = {
 
 static ht_item* ht_create_item(str k, str v)
 {
-    ht_item* ret = malloc(sizeof(ht_item));
-    if (!ret)
-        return NULL;
+    ht_item* ret = xmalloc(sizeof(ht_item));
+    char* key = xstrdup(k);
+    char* value = xstrdup(v);
 
-    ret->key = strndup(k, strlen(k));
-    ret->value = strndup(v, strlen(v));
-
+    ret->key = key, ret->value = value;
     return ret;
 }
 
 static void ht_delete_item(ht_item* item)
 {
-    free_space(item->value);
-    free_space(item->key);
-    free_space(item);
-
-    return;
+    free_space(item->value),
+        free_space(item->key),
+        free_space(item);
 }
 
 static ht_hash_table* ht_new_sized(const int base_size)
 {
-    ht_hash_table* table = malloc(sizeof(ht_hash_table));
-    if (!table) {
-        fprintf(stderr, "failed to make a new hash table due to low memory\n");
-        return NULL;
-    }
+    ht_hash_table* table = xmalloc(sizeof(ht_hash_table));
 
     table->base_size = base_size,
     table->size = next_prime(base_size),
     table->count = 0,
-    table->items = calloc(table->size, sizeof(ht_item*));
+    table->items = xcalloc(table->size, sizeof(ht_item*));
     if (!table->items) {
         fprintf(stderr, "failed to make room for the hash table's items due to low memory\n");
         return NULL;
@@ -119,8 +111,8 @@ void ht_delete_hash_table(ht_hash_table* tab)
             ht_delete_item(item);
     }
 
-    free_space(tab->items);
-    free_space(tab);
+    free_space(tab->items),
+        free_space(tab);
 }
 
 static int ht_hash(str key, const int prime_number, const int bucket_len)
@@ -185,8 +177,8 @@ void ht_insert(ht_hash_table* table, str key, str value)
     while (curr_item) {
         index = ht_get_hash(curr_item->key, table->size, i);
         curr_item = ht_find_entry(table, index);
-        if (curr_item == &HT_DELETED_ITEM)
-            goto INSERT_INTO_TABLE;
+        if (!curr_item || curr_item == &HT_DELETED_ITEM)
+            break;
 
         // if it's an update
         if (strncmp(curr_item->key, key, key_len) == 0) {
@@ -199,7 +191,7 @@ void ht_insert(ht_hash_table* table, str key, str value)
     }
 
 INSERT_INTO_TABLE:
-    table->items[index] = item;
+    table->items[index] = item,
     table->count++;
 }
 

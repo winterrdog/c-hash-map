@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "prime.h"
+#include "xmalloc.h"
 
 #define HT_PRIME_1 151
 #define HT_PRIME_2 163

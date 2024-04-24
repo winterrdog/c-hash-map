@@ -20,9 +20,13 @@ int is_prime(const int n)
     return 1;
 }
 
-int next_prime(const int x)
+int next_prime(int x)
 {
-    return is_prime(x) ? x : next_prime(x + 1);
+    while (1) {
+        if (is_prime(x))
+            return x;
+        x++;
+    }
 }
 
 // inspired by: audacity/audacity/libnyquist
