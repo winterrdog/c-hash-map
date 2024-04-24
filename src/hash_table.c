@@ -30,8 +30,10 @@ static void ht_delete_item(ht_item* item)
 static ht_hash_table* ht_new_sized(const int base_size)
 {
     ht_hash_table* table = malloc(sizeof(ht_hash_table));
-    if (!table)
+    if (!table) {
+        fprintf(stderr, "failed to make a new hash table due to low memory\n");
         return NULL;
+    }
 
     table->base_size = base_size,
     table->size = next_prime(base_size),
@@ -45,7 +47,6 @@ static ht_hash_table* ht_new_sized(const int base_size)
     return table;
 }
 
-ht_hash_table* ht_create_hash_table()
 static void ht_transfer_items(ht_hash_table* src, ht_hash_table* dest)
 {
     ht_item* item = NULL;
@@ -56,7 +57,6 @@ static void ht_transfer_items(ht_hash_table* src, ht_hash_table* dest)
     }
 }
 
-    return table;
 static void ht_resize(ht_hash_table* table, const int base_size)
 {
     if (base_size < HT_INITIAL_BASE_SIZE) {
@@ -121,8 +121,6 @@ void ht_delete_hash_table(ht_hash_table* tab)
 
     free_space(tab->items);
     free_space(tab);
-
-    return;
 }
 
 static int ht_hash(str key, const int prime_number, const int bucket_len)
@@ -130,7 +128,7 @@ static int ht_hash(str key, const int prime_number, const int bucket_len)
     const int str_len = strlen(key);
     long hash = 0;
 
-    for (int i = 0; i < str_len; ++i) {
+    for (int i = 0; i != str_len; ++i) {
         // for every character, get it's 'even' weight and value to convert it into large integer
         hash += ((long)pow(prime_number, str_len - (i + 1))) * key[i];
 
@@ -272,8 +270,7 @@ void ht_delete(ht_hash_table* table, str key)
 
 void free_space(void* ptr)
 {
-    if (!ptr)
-        return;
-
-    free(ptr), ptr = NULL;
+    if (ptr) {
+        free(ptr), ptr = NULL;
+    }
 }
