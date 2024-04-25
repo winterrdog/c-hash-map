@@ -4,6 +4,8 @@
 
 #include "hash_table.h"
 
+#define NUM_OF_ITEMS 50000 // You can change this to what you wish
+
 char* rand_word(int min_len, int max_len)
 {
     int i, length;
@@ -32,7 +34,7 @@ int main()
 {
     ht_hash_table* ht = ht_new();
 
-    for (int i = 0; i != 20000; i++) {
+    for (int i = 0; i != NUM_OF_ITEMS; i++) {
         char* k = rand_word(8, 16);
         char* v = rand_word(5, 15);
 

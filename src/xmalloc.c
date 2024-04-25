@@ -8,10 +8,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,11 +19,12 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- * 
+ *
  * winterrdog: i readapted xstrdup() to fit my needs
  */
 
 #include "xmalloc.h"
+#include <string.h>
 
 static void* xmalloc_fatal(size_t size)
 {
@@ -57,16 +58,13 @@ void* xrealloc(void* ptr, size_t size)
     return xmalloc_fatal(size);
 }
 
-char* xstrdup(const char* s)
+const char* xstrdup(const char* src)
 {
-    size_t len = strlen(s) + 1;
-    void* ptr = xmalloc(len);
-    strncpy(ptr, s, len);
-
-    // make sure the null is last
-    ((char*)ptr)[len - 1] = '\0';
-
-    return (char*)ptr;
+    size_t src_len = strlen(src) + 1;
+    char* dest = xmalloc(src_len);
+    memcpy(dest, src, src_len);
+    dest[src_len - 1] = 0;
+    return (const char*)dest;
 }
 
 void xfree(void* p)

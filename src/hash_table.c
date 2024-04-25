@@ -24,6 +24,11 @@ static inline int is_item_deleted(const ht_item* i)
     return i == &HT_DELETED_ITEM;
 }
 
+static int validate_index(ht_hash_table* table, int index)
+{
+    return index >= 0 && index < table->size;
+}
+
 static inline int is_item_present(const ht_item* i)
 {
     return i && !is_item_deleted(i);
@@ -137,22 +142,30 @@ void ht_insert(ht_hash_table* table, cstr k, cstr v)
 
     ht_item* item = ht_new_item(k, v);
     int index = ht_get_hash(k, table->size, 0);
+    if (!validate_index(table, index)) {
+        return;
+    }
     const ht_item* curr_item = table->items[index];
     if (!is_item_present(curr_item)) {
         goto INSERT_INTO_TABLE;
     }
 
+    // update key if it exists
+    cstr found_value = ht_search(table, k);
+    if (found_value) {
+        ht_del_item(curr_item);
+        table->items[index] = item;
+        return;
+    }
+
     int attempts = 1;
     size_t len_k = strlen(k);
     while (curr_item) {
-        // update key if it exists
-        if (!is_item_deleted(curr_item) && STRINGS_EQUAL(curr_item->key, k, len_k)) {
-            ht_del_item(curr_item);
-            table->items[index] = item;
+        index = ht_get_hash(k, table->size, attempts);
+        if (!validate_index(table, index)) {
             return;
         }
 
-        index = ht_get_hash(k, table->size, attempts);
         curr_item = table->items[index];
         if (!is_item_present(curr_item)) {
             break;
@@ -168,7 +181,7 @@ cstr ht_search(ht_hash_table* table, cstr k)
 {
     int index = ht_get_hash(k, table->size, 0);
     const ht_item* item = table->items[index];
-    if (!is_item_present(item)) {
+    if (!is_item_present(item) || !validate_index(table, index)) {
         return NULL;
     }
 
@@ -179,6 +192,9 @@ cstr ht_search(ht_hash_table* table, cstr k)
             return item->value;
         }
         index = ht_get_hash(k, table->size, attempts);
+        if (!validate_index(table, index)) {
+            break;
+        }
         item = table->items[index];
         if (!is_item_present(item)) {
             break;
@@ -202,6 +218,9 @@ void ht_delete(ht_hash_table* table, cstr k)
     }
 
     int index = ht_get_hash(k, table->size, 0);
+    if (!validate_index(table, index)) {
+        return;
+    }
     ht_del_item(table->items[index]);
     table->items[index] = &HT_DELETED_ITEM;
 
