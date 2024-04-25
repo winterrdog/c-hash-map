@@ -1,11 +1,12 @@
 #ifndef HASH_TABLE_H
 #define HASH_TABLE_H 1
 
-#include "prime.h"
-#include "xmalloc.h"
 #include <math.h>
 #include <stddef.h>
 #include <string.h>
+//
+#include "prime.h"
+#include "xmalloc.h"
 
 #define STRINGS_EQUAL(a, b, len_b) strncmp(a, b, len_b) == 0
 
@@ -20,7 +21,7 @@ typedef struct
     size_t size;
     size_t base_size;
     size_t count;
-    const ht_item** items;
+    ht_item** items;
 } ht_hash_table;
 
 // prototypes

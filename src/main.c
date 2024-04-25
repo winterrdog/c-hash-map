@@ -3,13 +3,14 @@
 #include <time.h>
 
 #include "hash_table.h"
+#include "xmalloc.h"
 
-#define NUM_OF_ITEMS 50000 // You can change this to what you wish
+#define NUM_OF_ITEMS 300 // You can change this to what you wish
 
 char* rand_word(int min_len, int max_len)
 {
     int i, length;
-    char c;
+    char c, *word;
 
     // seed random
     struct timespec ts;
@@ -19,12 +20,14 @@ char* rand_word(int min_len, int max_len)
     srand((time_t)ts.tv_nsec);
 
     length = rand() % (max_len - min_len + 1) + min_len;
-    char* word = xcalloc((size_t)(length + 1), sizeof(char));
+    word = xcalloc((size_t)(length + 1), sizeof(char));
 
-    for (i = 0; i < length; i++) {
+    for (i = 0; i != length; i++) {
         c = 'a' + rand() % 26;
         word[i] = c;
     }
+
+    // add NULL terminator
     word[i] = 0;
 
     return word;
@@ -33,13 +36,25 @@ char* rand_word(int min_len, int max_len)
 int main()
 {
     ht_hash_table* ht = ht_new();
+    char **k_arr, **v_arr, *k, *v;
 
-    for (int i = 0; i != NUM_OF_ITEMS; i++) {
-        char* k = rand_word(8, 16);
-        char* v = rand_word(5, 15);
+    k_arr = xcalloc(NUM_OF_ITEMS, sizeof(char*));
+    v_arr = xcalloc(NUM_OF_ITEMS, sizeof(char*));
 
+    for (int i = 0; i != NUM_OF_ITEMS; ++i) {
+        k_arr[i] = rand_word(12, 45);
+        v_arr[i] = rand_word(10, 100);
+    }
+
+    for (int i = 0; i != NUM_OF_ITEMS; ++i) {
+        k = k_arr[i], v = v_arr[i];
         ht_insert(ht, k, v);
     }
+
+    for (int i = 0; i != NUM_OF_ITEMS; ++i)
+        xfree(k_arr[i]), xfree(v_arr[i]);
+
+    xfree(k_arr), xfree(v_arr);
 
     ht_del_hash_table(ht);
     return 0;
