@@ -68,3 +68,10 @@ char* xstrdup(const char* s)
 
     return (char*)ptr;
 }
+
+void xfree(void* p)
+{
+    if (p) {
+        free(p), p = NULL;
+    }
+}

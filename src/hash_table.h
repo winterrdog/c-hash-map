@@ -1,39 +1,33 @@
 #ifndef HASH_TABLE_H
-#define HASH_TABLE_H
-
-#include <math.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#define HASH_TABLE_H 1
 
 #include "prime.h"
 #include "xmalloc.h"
+#include <math.h>
+#include <stddef.h>
+#include <string.h>
 
-#define HT_PRIME_1 151
-#define HT_PRIME_2 163
-#define HT_INITIAL_BASE_SIZE 50
+#define STRINGS_EQUAL(a, b, len_b) strncmp(a, b, len_b) == 0
 
-// type aliases
-typedef struct {
-    char* key;
-    char* value;
+typedef const char* cstr;
+typedef struct
+{
+    cstr key;
+    cstr value;
 } ht_item;
-typedef struct {
+typedef struct
+{
     size_t size;
     size_t base_size;
     size_t count;
-    ht_item** items;
+    const ht_item** items;
 } ht_hash_table;
-typedef const char* str;
 
-// function prototypes
-ht_hash_table* ht_create_hash_table(void);
-void ht_delete_hash_table(ht_hash_table* tab);
-void ht_insert(ht_hash_table* table, str key, str value);
-char* ht_search(ht_hash_table* table, str key);
-void ht_delete(ht_hash_table* table, str key);
-void free_space(void* ptr);
-size_t ht_size(ht_hash_table* table);
+// prototypes
+ht_hash_table* ht_new();
+void ht_del_hash_table(ht_hash_table* t);
+void ht_insert(ht_hash_table* table, cstr k, cstr v);
+void ht_delete(ht_hash_table* table, cstr k);
+cstr ht_search(ht_hash_table* table, cstr k);
 
 #endif
