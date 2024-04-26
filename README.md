@@ -1,6 +1,6 @@
 # ABOUT REPO
 
-This is a simple hash table implementation in C with functions to _insert/update, search, create, get size,_ and _delete_ the hash table. It only operates on string keys and string values ONLY. It handles collisions using _open addressing with double hashing_ which is the most used technique for most production-level hash tables. The hash table is implemented using a _dynamic array_ so it can grow and shrink as needed based on the current load factor.
+This is a hash table implementation in C with functions to _insert/update, search, create, get size,_ and _delete_ the hash table. It only operates on string keys and string values ONLY. It handles collisions using _open addressing with double hashing_ which is the most used technique for most production-level hash tables. The hash table is implemented using a _dynamic array_ so it can grow and shrink as needed based on the current load factor. Inspired by @jamesroutley's [implementation](https://github.com/jamesroutley/algorithms-and-data-structures/tree/master/hash-table). _I made drastic changes in some algorithms and fixed all memory bugs_.
 
 No memory leaks or `OOB` writes are possible in this program ( _at least to the limit of my knowledge_ ), you can verify that with:
 
@@ -66,4 +66,6 @@ This will run the driver program in `src/main.c` which demonstrates the usage of
 
 ## NOTE
 
-This hashmap can be used in production-level code but it is not YET optimized for performance with huge data sets of like `10^6` or more. However it can be used as a good base for learning how hash tables work and how to implement them in C plus using it as base line for production-level hash table. It's easy to start off with it and then optimize it as needed.
+This hashmap can be used in production-level code but it is not YET optimized for performance with huge data sets of like `10^6` or more. It can be used as a good base to make another custom hash table.
+
+For any issues or PRs you can always let me know.
