@@ -5,7 +5,9 @@
 #include "hash_table.h"
 #include "xmalloc.h"
 
-#define NUM_OF_ITEMS 300 // You can change this to what you wish
+#ifdef TEST
+
+#define NUM_OF_ITEMS 50000 // You can change this to what you wish
 
 char* rand_word(int min_len, int max_len)
 {
@@ -32,10 +34,13 @@ char* rand_word(int min_len, int max_len)
 
     return word;
 }
+#endif
 
 int main()
 {
     ht_hash_table* ht = ht_new();
+
+#ifdef TEST
     char **k_arr, **v_arr, *k, *v;
 
     k_arr = xcalloc(NUM_OF_ITEMS, sizeof(char*));
@@ -55,6 +60,15 @@ int main()
         xfree(k_arr[i]), xfree(v_arr[i]);
 
     xfree(k_arr), xfree(v_arr);
+#else
+    ht_insert(ht, "js", "1995");
+    ht_insert(ht, "py", "1991");
+    ht_insert(ht, "C++", "1980");
+
+    printf("js value: %s\n", ht_search(ht, "js"));
+    printf("C++ value: %s\n", ht_search(ht, "C++"));
+    printf("py value: %s\n", ht_search(ht, "py"));
+#endif
 
     ht_del_hash_table(ht);
     return 0;
