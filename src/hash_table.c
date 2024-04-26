@@ -3,6 +3,9 @@
 static const int HT_PRIME_1 = 151;
 static const int HT_PRIME_2 = 163;
 
+static const int RESIZE_UP_LOAD_LEVEL = 70;
+static const int RESIZE_DOWN_LOAD_LEVEL = 20;
+
 // sentinel value to mean item was deleted
 static ht_item HT_DELETED_ITEM = {
     .key = NULL,
@@ -10,14 +13,6 @@ static ht_item HT_DELETED_ITEM = {
 };
 
 static const size_t HT_INITIAL_BASE_SIZE = 50;
-
-static ht_item* ht_new_item(cstr key, cstr value)
-{
-    ht_item* item = xmalloc(sizeof(ht_item));
-    item->key = xstrdup(key);
-    item->value = xstrdup(value);
-    return item;
-}
 
 static inline int is_item_deleted(const ht_item* i)
 {
@@ -32,6 +27,13 @@ static int is_valid_index(ht_hash_table* table, int index)
 static inline int is_item_present(const ht_item* i)
 {
     return i && !is_item_deleted(i);
+}
+
+static ht_item* ht_new_item(cstr key, cstr value)
+{
+    ht_item* item = xmalloc(sizeof(ht_item));
+    item->key = xstrdup(key), item->value = xstrdup(value);
+    return item;
 }
 
 static void ht_del_item(const ht_item* item)
@@ -53,6 +55,7 @@ static int ht_hash(cstr key, const int prime_number, const int buckets)
 
 static int ht_get_hash(cstr key, const int buckets, const int attempts)
 {
+    // use double hashing for getting hash
     const int hash_a = ht_hash(key, HT_PRIME_1, buckets);
     const int hash_b = ht_hash(key, HT_PRIME_2, buckets);
     const int hash = (hash_a + (attempts * (hash_b + 1)));
@@ -70,30 +73,32 @@ static ht_hash_table* ht_new_sized(const size_t base_size)
     return table;
 }
 
-static void ht_resize(ht_hash_table* curr_table, const size_t base_size)
+static void ht_resize(ht_hash_table* old_table, const size_t base_size)
 {
     if (base_size < HT_INITIAL_BASE_SIZE) {
         return;
     }
 
+    // move items from old table to new table
     const ht_item* item;
     ht_hash_table* new_table = ht_new_sized(base_size);
-    for (size_t i = 0; i != curr_table->size; ++i) {
-        item = curr_table->items[i];
+    for (size_t i = 0; i != old_table->size; ++i) {
+        item = old_table->items[i];
         if (is_item_present(item)) {
             ht_insert(new_table, item->key, item->value);
         }
     }
 
-    curr_table->base_size = new_table->base_size, curr_table->count = new_table->count;
+    // transfer new table's data to old table
+    old_table->base_size = new_table->base_size, old_table->count = new_table->count;
 
     // swap info between tables
-    curr_table->size ^= new_table->size;
-    new_table->size ^= curr_table->size;
-    curr_table->size ^= new_table->size;
+    old_table->size ^= new_table->size;
+    new_table->size ^= old_table->size;
+    old_table->size ^= new_table->size;
 
-    ht_item** tmp_items = curr_table->items;
-    curr_table->items = new_table->items;
+    ht_item** tmp_items = old_table->items;
+    old_table->items = new_table->items;
     new_table->items = tmp_items;
 
     ht_del_hash_table(new_table);
@@ -136,7 +141,8 @@ void ht_del_hash_table(ht_hash_table* table)
 
 void ht_insert(ht_hash_table* table, cstr k, cstr v)
 {
-    if (ht_calc_table_load(table) >= 60) {
+    // create more room if above ceiling
+    if (ht_calc_table_load(table) >= RESIZE_UP_LOAD_LEVEL) {
         ht_resize_up(table);
     }
 
@@ -151,6 +157,7 @@ void ht_insert(ht_hash_table* table, cstr k, cstr v)
         goto INSERT_INTO_TABLE;
     }
 
+    // look for an empty or deleted spot to place the new item
     int attempts = 1;
     size_t len_k = strlen(k);
     while (curr_item) {
@@ -179,22 +186,23 @@ INSERT_INTO_TABLE:
 cstr ht_search(ht_hash_table* table, cstr k)
 {
     int index = ht_get_hash(k, table->size, 0);
-    const ht_item* item = table->items[index];
-    if (!is_item_present(item) || !is_valid_index(table, index)) {
+    const ht_item* curr_item = table->items[index];
+    if (!is_item_present(curr_item) || !is_valid_index(table, index)) {
         return NULL;
     }
 
+    // search for key's index in table
     int attempts = 1;
     size_t len_k = strlen(k);
-    while (item) {
-        if (!is_item_deleted(item) && STRINGS_EQUAL(item->key, k, len_k)) {
-            return item->value;
+    while (curr_item) {
+        if (!is_item_deleted(curr_item) && STRINGS_EQUAL(curr_item->key, k, len_k)) {
+            return curr_item->value;
         }
 
         index = ht_get_hash(k, table->size, attempts);
         if (is_valid_index(table, index)) {
-            item = table->items[index];
-            if (!is_item_present(item)) {
+            curr_item = table->items[index];
+            if (!is_item_present(curr_item)) {
                 break;
             }
         }
@@ -207,7 +215,7 @@ cstr ht_search(ht_hash_table* table, cstr k)
 
 void ht_delete(ht_hash_table* table, cstr k)
 {
-    if (ht_calc_table_load(table) < 20) {
+    if (ht_calc_table_load(table) < RESIZE_DOWN_LOAD_LEVEL) {
         ht_resize_down(table);
     }
 
@@ -222,6 +230,7 @@ void ht_delete(ht_hash_table* table, cstr k)
         return;
     }
 
+    // delete item
     ht_del_item(table->items[index]);
     table->items[index] = &HT_DELETED_ITEM;
 
