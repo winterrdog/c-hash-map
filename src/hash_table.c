@@ -236,3 +236,8 @@ void ht_delete(ht_hash_table* table, cstr k)
 
     table->count--;
 }
+
+size_t ht_size(ht_hash_table* table)
+{
+    return table->count;
+}

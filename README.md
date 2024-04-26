@@ -40,7 +40,7 @@ void ht_del_hash_table(ht_hash_table* t); // 'deletes' an existing hash table
 void ht_insert(ht_hash_table* table, const char* k, const char* v); // 'inserts' a new key-value pair
 void ht_delete(ht_hash_table* table, const char* k); // 'deletes' a key-value pair from the hash table
 const char* ht_search(ht_hash_table* table, const char* k); // 'searches' for a key in the hash table
-
+size_t ht_size(ht_hash_table* table); // get number of elements in hash table
 ```
 
 ## Usage

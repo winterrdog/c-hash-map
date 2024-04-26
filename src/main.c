@@ -8,7 +8,6 @@
 #ifdef TEST
 
 #define NUM_OF_ITEMS 50000 // You can change this to what you wish
-
 char* rand_word(int min_len, int max_len)
 {
     int i, length;
@@ -68,6 +67,7 @@ int main()
     printf("js value: %s\n", ht_search(ht, "js"));
     printf("C++ value: %s\n", ht_search(ht, "C++"));
     printf("py value: %s\n", ht_search(ht, "py"));
+    printf("number of elements in hash table: %ld", ht_size(ht));
 #endif
 
     ht_del_hash_table(ht);

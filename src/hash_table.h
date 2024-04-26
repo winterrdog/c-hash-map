@@ -30,5 +30,6 @@ void ht_del_hash_table(ht_hash_table* t);
 void ht_insert(ht_hash_table* table, cstr k, cstr v);
 void ht_delete(ht_hash_table* table, cstr k);
 cstr ht_search(ht_hash_table* table, cstr k);
+size_t ht_size(ht_hash_table* table);
 
 #endif
