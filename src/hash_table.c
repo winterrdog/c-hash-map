@@ -19,11 +19,6 @@ static inline int is_item_deleted(const ht_item* i)
     return i == &HT_DELETED_ITEM;
 }
 
-static int is_valid_index(ht_hash_table* table, int index)
-{
-    return index >= 0 && index < table->size;
-}
-
 static inline int is_item_present(const ht_item* i)
 {
     return i && !is_item_deleted(i);
@@ -57,8 +52,11 @@ static int ht_get_hash(cstr key, const int buckets, const int attempts)
 {
     // use double hashing for getting hash
     const int hash_a = ht_hash(key, HT_PRIME_1, buckets);
-    const int hash_b = ht_hash(key, HT_PRIME_2, buckets);
-    const int hash = (hash_a + (attempts * (hash_b + 1)));
+    int hash_b = ht_hash(key, HT_PRIME_2, buckets);
+    if (!hash_b || hash_b % buckets == 0) { // handle cases hash_b == 0 || hash_b == buckets
+        hash_b = 1;
+    }
+    const int hash = (hash_a + (attempts * hash_b));
 
     return hash % buckets;
 }
@@ -148,9 +146,6 @@ void ht_insert(ht_hash_table* table, cstr k, cstr v)
 
     ht_item* item = ht_new_item(k, v);
     int index = ht_get_hash(k, table->size, 0);
-    if (!is_valid_index(table, index)) {
-        return;
-    }
 
     const ht_item* curr_item = table->items[index];
     if (!is_item_present(curr_item)) {
@@ -169,11 +164,9 @@ void ht_insert(ht_hash_table* table, cstr k, cstr v)
         }
 
         index = ht_get_hash(k, table->size, attempts);
-        if (is_valid_index(table, index)) {
-            curr_item = table->items[index];
-            if (!is_item_present(curr_item)) {
-                break;
-            }
+        curr_item = table->items[index];
+        if (!is_item_present(curr_item)) {
+            break;
         }
 
         ++attempts;
@@ -187,7 +180,7 @@ cstr ht_search(ht_hash_table* table, cstr k)
 {
     int index = ht_get_hash(k, table->size, 0);
     const ht_item* curr_item = table->items[index];
-    if (!is_item_present(curr_item) || !is_valid_index(table, index)) {
+    if (!is_item_present(curr_item)) {
         return NULL;
     }
 
@@ -200,11 +193,9 @@ cstr ht_search(ht_hash_table* table, cstr k)
         }
 
         index = ht_get_hash(k, table->size, attempts);
-        if (is_valid_index(table, index)) {
-            curr_item = table->items[index];
-            if (!is_item_present(curr_item)) {
-                break;
-            }
+        curr_item = table->items[index];
+        if (!is_item_present(curr_item)) {
+            break;
         }
 
         ++attempts;
@@ -226,9 +217,6 @@ void ht_delete(ht_hash_table* table, cstr k)
     }
 
     int index = ht_get_hash(k, table->size, 0);
-    if (!is_valid_index(table, index)) {
-        return;
-    }
 
     // delete item
     ht_del_item(table->items[index]);
@@ -237,7 +225,7 @@ void ht_delete(ht_hash_table* table, cstr k)
     table->count--;
 }
 
-size_t ht_size(ht_hash_table* table)
+inline size_t ht_size(ht_hash_table* table)
 {
     return table->count;
 }

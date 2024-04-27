@@ -7,7 +7,7 @@
 
 #ifdef TEST
 
-#define NUM_OF_ITEMS 50000 // You can change this to what you wish
+#define NUM_OF_ITEMS 500000 // You can change this to what you wish
 char* rand_word(int min_len, int max_len)
 {
     int i, length;
@@ -46,8 +46,8 @@ int main()
     v_arr = xcalloc(NUM_OF_ITEMS, sizeof(char*));
 
     for (int i = 0; i != NUM_OF_ITEMS; ++i) {
-        k_arr[i] = rand_word(12, 45);
-        v_arr[i] = rand_word(10, 100);
+        k_arr[i] = rand_word(12, 100);
+        v_arr[i] = rand_word(10, 1000);
     }
 
     for (int i = 0; i != NUM_OF_ITEMS; ++i) {

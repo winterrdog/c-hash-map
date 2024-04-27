@@ -62,10 +62,9 @@ This will run the driver program in `src/main.c` which demonstrates the usage of
 ## TODO
 
 - Add support for multiple data types
-- optimize for data sets of size `10^6` or more
 
 ## NOTE
 
-This hashmap can be used in production-level code but it is not YET optimized for performance with huge data sets of like `10^6` or more. It can be used as a good base to make another custom hash table.
+This hashmap can be used in production-level code. It can be used as a good base to make another custom hash table.
 
 For any issues or PRs you can always let me know.

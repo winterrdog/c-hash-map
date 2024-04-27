@@ -22,7 +22,12 @@ int is_prime(const int n)
 
 int next_prime(int x)
 {
-    return is_prime(x) ? x : next_prime(x + 1);
+    do {
+        if (is_prime(x)) {
+            return x;
+        }
+        x++;
+    } while (1);
 }
 
 // inspired by: audacity/audacity/libnyquist
