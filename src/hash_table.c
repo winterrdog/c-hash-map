@@ -39,12 +39,21 @@ static void ht_del_item(const ht_item* item)
 
 static int ht_hash(cstr key, const int prime_number, const int buckets)
 {
+    // get length of string
+    cstr c = key;
+    size_t len = 0;
+    while (*c++) {
+        len++;
+    }
+
+    // calculate hash
     long hash = 0;
-    size_t len = strlen(key);
-    for (size_t i = 0; i != len; ++i) {
-        hash += ((long)pow(prime_number, len - (i + 1)) * key[i]);
+    int i = 0;
+    for (c = key; *c != 0; ++c, ++i) {
+        hash += ((long)pow(prime_number, len - (i + 1)) * (*c));
         hash = hash % buckets;
     }
+
     return (int)hash;
 }
 
